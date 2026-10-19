@@ -77,6 +77,7 @@ h1{font-size:28px;line-height:1.15}
 #mdl[hidden]{display:none}
 .mb{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;width:100%;max-width:460px;animation:up .25s both}
 .mb textarea{min-height:110px}
+input[type=search]{-webkit-appearance:none;appearance:none}
 </style></head><body><main>
 <div class="eyebrow">Delegador · gestão de time</div><header><h1>Delegue como um militar</h1><button id="tg" class="o" onclick="theme()" title="Alternar tema">🌙</button></header><div class="sub">Preencha os 4 passos → copie a mensagem → acompanhe.</div>
 
@@ -114,8 +115,9 @@ h1{font-size:28px;line-height:1.15}
 <div id="tab2" hidden>
 <div class="card"><h2>Acompanhamentos</h2>
 <div id="st"></div>
+<input id="q" type="search" placeholder="🔍 Buscar pelo título da tarefa..." oninput="draw()" style="margin-bottom:8px">
 <select id="fl" onchange="draw()" style="margin-bottom:8px"><option value="">Todos os status</option><option>Pendente</option><option>Em andamento</option><option>Aguardando</option><option>Concluída</option></select>
-<div class="row" style="margin-bottom:8px"><button class="g" onclick="perm()">🔔 Ativar avisos</button><button class="o" onclick="testN()" style="flex:0 0 auto">Testar</button>
+<div class="row" style="margin-bottom:8px"><button class="g" onclick="perm()">🔔 Ativar avisos</button>
 <select id="iv" onchange="setIv()"><option value="1">Lembrar a cada 1 min (teste)</option><option value="15">a cada 15 min</option><option value="30">a cada 30 min</option><option value="60">a cada 1 hora</option><option value="120">a cada 2 horas</option></select></div>
 <div id="ns" style="font-size:13px;color:var(--mut);margin-bottom:8px"></div>
 <div id="list">Nada salvo.</div></div>
@@ -154,13 +156,15 @@ Notification.requestPermission().then(()=>{ns();new Notification('Avisos ativado
 function ns(){const p='Notification' in window?Notification.permission:'none';
 $('ns').textContent=p=='granted'?'🔔 Avisos ativos — mantenha esta aba aberta. Pendente/Em andamento = avisa; Aguardando/Concluída = silencia.':'🔕 Notificação do sistema indisponível (comum em arquivo local). Os lembretes virão como pop-up de alerta nesta aba.'}
 function esc(v){return String(v||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+function nz(v){return String(v||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().trim()}
+function mq(t){const w=nz($('q').value).split(/\s+/).filter(Boolean),T=nz(t);return w.every(k=>T.includes(k))}
 function draw(){const now=new Date().toISOString().slice(0,10);
 const cnt=q=>L.filter(x=>x.s==q).length,lt=L.filter(x=>x.d&&x.d<now&&ACT.includes(x.s)).length,pc=L.length?Math.round(cnt('Concluída')/L.length*100):0;
 $('st').innerHTML='<div class="stats">'+[['Pendentes',cnt('Pendente'),'pend'],['Em andamento',cnt('Em andamento'),'and'],['Aguardando',cnt('Aguardando'),'agu'],['Concluídas',cnt('Concluída'),'ok'],['Atrasadas',lt,'late']].map(([a,b,c])=>`<div class="stat k-${c}"><b>${b}</b><span>${a}</span></div>`).join('')+`</div><div class="prog"><i style="width:${pc}%"></i></div><div class="pt">${pc}% concluído</div>`;
-const fl=$('fl').value;const V=L.map((x,n)=>[x,n]).filter(([x])=>!fl||x.s==fl);$('list').innerHTML=V.length?V.map(([x,n])=>{const late=x.d&&x.d<now&&ACT.includes(x.s);
+const fl=$('fl').value;const V=L.map((x,n)=>[x,n]).filter(([x])=>(!fl||x.s==fl)&&mq(x.t));$('list').innerHTML=V.length?V.map(([x,n])=>{const late=x.d&&x.d<now&&ACT.includes(x.s);
 const ini=(x.p||'?').trim().slice(0,2).toUpperCase(),cls=['pend','and','agu','ok'][ST.indexOf(x.s)];
 return `<div class="item s-${cls} ${x.s=='Concluída'?'done':''}"><div class="hd" onclick="tgl(${n})"><div class="av">${esc(ini)}</div><div class="tt"><b>${esc(x.t)}</b><span class="mt">${esc(x.p||'Sem responsável')}${late?' · <span class="late">⚠ atrasada</span>':''}</span><span class="mt">📅 ${x.d?x.d.split('-').reverse().join('/'):'sem prazo'}${x.f?' · '+esc(x.f):''}${x.cb?' · 🔔 '+new Date(x.cb).toLocaleString('pt-BR').slice(0,-3):''}</span></div><span class="bd b-${cls}">${x.s}</span><span class="ch">${x.ex?'▾':'▸'}</span></div>${x.ex?det(x):''}<div style="margin-top:6px">
-<select onchange="ch(${n},this.value)" style="width:auto">${ST.map(s=>`<option ${s==x.s?'selected':''}>${s}</option>`).join('')}</select> ${x.cb&&x.s!='Concluída'?`<button class="o" onclick="ad(${n})">Adiar cobrança +1 dia</button> `:''}${x.s=='Concluída'?`<button class="o" onclick="cd(${n})">📝 Conclusão</button>`:''}<button class="o" onclick="edit(${n})">✏️ Editar</button> <button class="o" onclick="rm(${n})">Excluir</button></div></div>`}).join(''):'<div class="empty">✨<br>Nenhuma tarefa por aqui.<small>Registre uma delegação na aba Registrar.</small></div>';
+<select onchange="ch(${n},this.value)" style="width:auto">${ST.map(s=>`<option ${s==x.s?'selected':''}>${s}</option>`).join('')}</select> ${x.cb&&x.s!='Concluída'?`<button class="o" onclick="ad(${n})">Adiar cobrança +1 dia</button> `:''}${x.s=='Concluída'?`<button class="o" onclick="cd(${n})">📝 Conclusão</button>`:''}<button class="o" onclick="edit(${n})">✏️ Editar</button> <button class="o" onclick="rm(${n})">Excluir</button></div></div>`}).join(''):'<div class="empty">✨<br>'+(L.length?'Nenhuma tarefa encontrada.<small>Tente outra palavra ou limpe os filtros.</small>':'Nenhuma tarefa por aqui.<small>Registre uma delegação na aba Registrar.</small>')+'</div>';
 const c=L.filter(x=>ACT.includes(x.s)).length;$('b2').textContent='📋 Acompanhamentos ('+L.length+')';document.title=(c?`(${c}) `:'')+'Delegador'}
 function sv(){try{localStorage.dlg=JSON.stringify(L)}catch(e){}draw()}
 function save(){if(!$('t').value)return;
@@ -185,7 +189,6 @@ function mok(){const x=L[cdi];if(x.s!='Concluída'){x.s='Concluída';x.n=Date.no
 document.addEventListener('keydown',e=>{if(e.key=='Escape'&&!$('mdl').hidden)mclose()});
 function ch(n,s){if(s=='Concluída'){cd(n);return}L[n].s=s;L[n].n=Date.now();sv()}function rm(n){L.splice(n,1);sv()}
 function NN(t,o){if('Notification' in window&&Notification.permission=='granted')return new Notification(t,o);setTimeout(()=>alert(t+'\n'+o.body),50);return {}}
-function testN(){const p='Notification' in window?Notification.permission:'indisponível';NN('Teste de aviso','Se você viu isto, as notificações funcionam.');$('ns').textContent='Versão v5 · permissão do navegador: '+p+' · cobrança por data ativa'}
 function tick(){const now=Date.now();let ch=0;
 L.forEach(x=>{if(x.s!='Concluída'&&x.cb&&new Date(x.cb).getTime()<=now&&now-(x.nc||0)>=iv*60000){x.nc=now;ch=1;
 const nt=NN('Cobrar '+(x.p||'responsável')+': '+x.t,{body:'Hora de cobrar. Concluída encerra; "Adiar cobrança" define novo lembrete.',tag:'c'+x.t,requireInteraction:true});
