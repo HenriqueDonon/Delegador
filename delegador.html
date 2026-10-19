@@ -24,6 +24,7 @@ pre{white-space:pre-wrap;background:#f0eeea;padding:12px;border-radius:8px;font:
 
 <div class="tabs"><button id="b1" onclick="tab(1)">✍ Registrar</button><button id="b2" class="o" onclick="tab(2)">📋 Acompanhamentos</button></div>
 <div id="tab1">
+<div id="eb" class="res mid" hidden style="margin:0 0 14px"></div>
 <div class="card"><h2><span class="step">1</span>Organize as prioridades</h2>
 <label>Tarefa</label><input id="t" placeholder="Ex.: Atualizar firmware dos firewalls do cliente X">
 <div class="row"><div><label>Urgência</label><select id="u"><option value="1">Muito urgente</option><option value="0">Pouco urgente</option></select></div>
@@ -47,7 +48,7 @@ pre{white-space:pre-wrap;background:#f0eeea;padding:12px;border-radius:8px;font:
 <label>Como/quando acompanhar</label><input id="f" placeholder="Ex.: check-in toda quarta, 10h">
 <label>Cobrar em (data e hora do lembrete)</label><input id="cb" type="datetime-local">
 <label>Critérios de sucesso</label><textarea id="c"></textarea>
-<div style="margin-top:12px" class="row"><button class="g" onclick="gen()">Gerar mensagem</button><button class="o" onclick="save()">Salvar acompanhamento</button></div></div>
+<div style="margin-top:12px" class="row"><button class="g" onclick="gen()">Gerar mensagem</button><button id="sb" class="o" onclick="save()">Salvar acompanhamento</button></div></div>
 
 <div class="card" id="out" hidden><h2>Mensagem</h2><pre id="msg"></pre><button onclick="navigator.clipboard.writeText(msg.textContent)">Copiar</button></div>
 
@@ -93,13 +94,21 @@ $('ns').textContent=p=='granted'?'🔔 Avisos ativos — mantenha esta aba abert
 function draw(){const now=new Date().toISOString().slice(0,10);
 const fl=$('fl').value;const V=L.map((x,n)=>[x,n]).filter(([x])=>!fl||x.s==fl);$('list').innerHTML=V.length?V.map(([x,n])=>{const late=x.d&&x.d<now&&ACT.includes(x.s);
 return `<div class="item ${x.s=='Concluída'?'done':''}"><div class="hd" onclick="tgl(${n})"><b>${x.ex?'▾':'▸'} ${x.t}</b> → ${x.p}${late?' <span style="color:var(--r)">⚠ atrasada</span>':''}<br>Prazo: ${x.d||'-'} · ${x.f||''}${x.cb?'<br>🔔 Cobrar: '+new Date(x.cb).toLocaleString('pt-BR').slice(0,-3):''}</div>${x.ex?det(x):''}<div style="margin-top:6px">
-<select onchange="ch(${n},this.value)" style="width:auto">${ST.map(s=>`<option ${s==x.s?'selected':''}>${s}</option>`).join('')}</select> ${x.cb&&x.s!='Concluída'?`<button class="o" onclick="ad(${n})">Adiar cobrança +1 dia</button> `:''}<button class="o" onclick="rm(${n})">Excluir</button></div></div>`}).join(''):'Nada salvo.';
+<select onchange="ch(${n},this.value)" style="width:auto">${ST.map(s=>`<option ${s==x.s?'selected':''}>${s}</option>`).join('')}</select> ${x.cb&&x.s!='Concluída'?`<button class="o" onclick="ad(${n})">Adiar cobrança +1 dia</button> `:''}<button class="o" onclick="edit(${n})">✏️ Editar</button> <button class="o" onclick="rm(${n})">Excluir</button></div></div>`}).join(''):'Nada salvo.';
 const c=L.filter(x=>ACT.includes(x.s)).length;$('b2').textContent='📋 Acompanhamentos ('+L.length+')';document.title=(c?`(${c}) `:'')+'Delegador'}
 function sv(){try{localStorage.dlg=JSON.stringify(L)}catch(e){}draw()}
-function save(){if(!$('t').value)return;L.unshift({t:$('t').value,p:$('p').value,d:$('d').value,f:$('f').value,w:$('w').value,o:$('o').value,l:$('l').value,c:$('c').value,rep:$('rep').checked,s:$('p').value&&$('cb').value?'Aguardando':'Pendente',cb:$('cb').value,nc:0,n:Date.now()});clr();sv();tab(2)}
+function save(){if(!$('t').value)return;
+if(ed!==null){const x=L[ed];if(x.cb!=$('cb').value)x.nc=0;Object.assign(x,{t:$('t').value,p:$('p').value,d:$('d').value,f:$('f').value,w:$('w').value,o:$('o').value,l:$('l').value,c:$('c').value,rep:$('rep').checked,cb:$('cb').value});ed=null;clr();sv();tab(2);return}
+L.unshift({t:$('t').value,p:$('p').value,d:$('d').value,f:$('f').value,w:$('w').value,o:$('o').value,l:$('l').value,c:$('c').value,rep:$('rep').checked,s:$('p').value&&$('cb').value?'Aguardando':'Pendente',cb:$('cb').value,nc:0,n:Date.now()});clr();sv();tab(2)}
 function ad(n){const d=new Date(Math.max(Date.now(),new Date(L[n].cb||Date.now()).getTime())+864e5);L[n].cb=new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,16);L[n].nc=0;sv()}
+let ed=null;
+function edit(n){const x=L[n];clr();ed=n;
+const v={t:x.t,p:x.p,w:x.w,o:x.o,l:x.l,d:x.d,f:x.f,cb:x.cb,c:x.c};for(const k in v)$(k).value=v[k]||'';
+$('rep').checked=!!x.rep;$('eb').innerHTML='✏️ Editando: <b>'+x.t.replace(/</g,'&lt;')+'</b> <button class="o" onclick="cancelEd()">Cancelar</button>';
+$('eb').hidden=false;$('sb').textContent='Salvar alterações';tab(1);scrollTo(0,0)}
+function cancelEd(){ed=null;clr();tab(2)}
 function tab(k){$('tab1').hidden=k!=1;$('tab2').hidden=k!=2;$('b1').className=k==1?'':'o';$('b2').className=k==2?'':'o'}
-function clr(){['t','p','w','o','l','d','f','cb','c'].forEach(i=>$(i).value='');$('h').checked=$('a').checked=$('rep').checked=false;$('out').hidden=true;r1();r2()}
+function clr(){['t','p','w','o','l','d','f','cb','c'].forEach(i=>$(i).value='');$('h').checked=$('a').checked=$('rep').checked=false;$('out').hidden=true;$('eb').hidden=true;$('sb').textContent='Salvar acompanhamento';r1();r2()}
 function tgl(n){L[n].ex=!L[n].ex;sv()}
 function det(x){const r=(a,b)=>`<b>${a}</b>${String(b||'-').replace(/</g,'&lt;')}`;
 return `<div class="det">${r('Status',x.s)}${r('Por que é importante',x.w)}${r('Objetivo final',x.o)}${r('Limites',x.l)}${r('Critérios de sucesso',x.c)}${r('Prazo',x.d)}${r('Acompanhamento',x.f)}${r('Cobrar em',x.cb?new Date(x.cb).toLocaleString('pt-BR').slice(0,-3):'')}${r('Entendimento confirmado',x.rep?'Sim':'Não')}</div>`}
