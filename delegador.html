@@ -73,6 +73,10 @@ h1{font-size:28px;line-height:1.15}
 .empty{text-align:center;padding:30px 10px;color:var(--mut);font-size:15px;line-height:1.6}
 .empty small{display:block;font-size:13px}
 @media(max-width:520px){.stats{grid-template-columns:repeat(3,1fr)}h1{font-size:24px}}
+#mdl{position:fixed;inset:0;background:#000a;display:grid;place-items:center;z-index:50;padding:16px;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+#mdl[hidden]{display:none}
+.mb{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;width:100%;max-width:460px;animation:up .25s both}
+.mb textarea{min-height:110px}
 </style></head><body><main>
 <div class="eyebrow">Delegador · gestão de time</div><header><h1>Delegue como um militar</h1><button id="tg" class="o" onclick="theme()" title="Alternar tema">🌙</button></header><div class="sub">Preencha os 4 passos → copie a mensagem → acompanhe.</div>
 
@@ -117,6 +121,9 @@ h1{font-size:28px;line-height:1.15}
 <div id="list">Nada salvo.</div></div>
 </div>
 
+<div id="mdl" hidden><div class="mb"><h2>✅ Descrição da conclusão</h2><div class="mt" id="mtt"></div>
+<label>O que foi feito / resultado</label><textarea id="mtx" placeholder="Ex.: Firmware atualizado nos 3 firewalls, sem indisponibilidade."></textarea>
+<div class="row" style="margin-top:12px"><button class="o" onclick="mclose()">Cancelar</button><button onclick="mok()">Concluir tarefa</button></div></div></div>
 <script>
 const $=id=>document.getElementById(id);
 function r1(){const U=+$('u').value,I=+$('i').value;
@@ -153,7 +160,7 @@ $('st').innerHTML='<div class="stats">'+[['Pendentes',cnt('Pendente'),'pend'],['
 const fl=$('fl').value;const V=L.map((x,n)=>[x,n]).filter(([x])=>!fl||x.s==fl);$('list').innerHTML=V.length?V.map(([x,n])=>{const late=x.d&&x.d<now&&ACT.includes(x.s);
 const ini=(x.p||'?').trim().slice(0,2).toUpperCase(),cls=['pend','and','agu','ok'][ST.indexOf(x.s)];
 return `<div class="item s-${cls} ${x.s=='Concluída'?'done':''}"><div class="hd" onclick="tgl(${n})"><div class="av">${esc(ini)}</div><div class="tt"><b>${esc(x.t)}</b><span class="mt">${esc(x.p||'Sem responsável')}${late?' · <span class="late">⚠ atrasada</span>':''}</span><span class="mt">📅 ${x.d?x.d.split('-').reverse().join('/'):'sem prazo'}${x.f?' · '+esc(x.f):''}${x.cb?' · 🔔 '+new Date(x.cb).toLocaleString('pt-BR').slice(0,-3):''}</span></div><span class="bd b-${cls}">${x.s}</span><span class="ch">${x.ex?'▾':'▸'}</span></div>${x.ex?det(x):''}<div style="margin-top:6px">
-<select onchange="ch(${n},this.value)" style="width:auto">${ST.map(s=>`<option ${s==x.s?'selected':''}>${s}</option>`).join('')}</select> ${x.cb&&x.s!='Concluída'?`<button class="o" onclick="ad(${n})">Adiar cobrança +1 dia</button> `:''}<button class="o" onclick="edit(${n})">✏️ Editar</button> <button class="o" onclick="rm(${n})">Excluir</button></div></div>`}).join(''):'<div class="empty">✨<br>Nenhuma tarefa por aqui.<small>Registre uma delegação na aba Registrar.</small></div>';
+<select onchange="ch(${n},this.value)" style="width:auto">${ST.map(s=>`<option ${s==x.s?'selected':''}>${s}</option>`).join('')}</select> ${x.cb&&x.s!='Concluída'?`<button class="o" onclick="ad(${n})">Adiar cobrança +1 dia</button> `:''}${x.s=='Concluída'?`<button class="o" onclick="cd(${n})">📝 Conclusão</button>`:''}<button class="o" onclick="edit(${n})">✏️ Editar</button> <button class="o" onclick="rm(${n})">Excluir</button></div></div>`}).join(''):'<div class="empty">✨<br>Nenhuma tarefa por aqui.<small>Registre uma delegação na aba Registrar.</small></div>';
 const c=L.filter(x=>ACT.includes(x.s)).length;$('b2').textContent='📋 Acompanhamentos ('+L.length+')';document.title=(c?`(${c}) `:'')+'Delegador'}
 function sv(){try{localStorage.dlg=JSON.stringify(L)}catch(e){}draw()}
 function save(){if(!$('t').value)return;
@@ -170,8 +177,13 @@ function tab(k){$('tab1').hidden=k!=1;$('tab2').hidden=k!=2;$('b1').className=k=
 function clr(){['t','p','w','o','l','d','f','cb','c'].forEach(i=>$(i).value='');$('h').checked=$('a').checked=$('rep').checked=false;$('out').hidden=true;$('eb').hidden=true;$('sb').textContent='Salvar acompanhamento';r1();r2()}
 function tgl(n){L[n].ex=!L[n].ex;sv()}
 function det(x){const r=(a,b)=>`<b>${a}</b>${String(b||'-').replace(/</g,'&lt;')}`;
-return `<div class="det">${r('Status',x.s)}${r('Por que é importante',x.w)}${r('Objetivo final',x.o)}${r('Limites',x.l)}${r('Critérios de sucesso',x.c)}${r('Prazo',x.d)}${r('Acompanhamento',x.f)}${r('Cobrar em',x.cb?new Date(x.cb).toLocaleString('pt-BR').slice(0,-3):'')}${r('Entendimento confirmado',x.rep?'Sim':'Não')}</div>`}
-function ch(n,s){L[n].s=s;L[n].n=Date.now();sv()}function rm(n){L.splice(n,1);sv()}
+return `<div class="det">${r('Status',x.s)}${x.s=='Concluída'?r('Descrição da conclusão',x.cd)+(x.dt?r('Concluída em',new Date(x.dt).toLocaleString('pt-BR').slice(0,-3)):''):''}${r('Por que é importante',x.w)}${r('Objetivo final',x.o)}${r('Limites',x.l)}${r('Critérios de sucesso',x.c)}${r('Prazo',x.d)}${r('Acompanhamento',x.f)}${r('Cobrar em',x.cb?new Date(x.cb).toLocaleString('pt-BR').slice(0,-3):'')}${r('Entendimento confirmado',x.rep?'Sim':'Não')}</div>`}
+let cdi=null;
+function cd(n){cdi=n;const x=L[n];$('mtt').textContent=x.t;$('mtx').value=x.cd||'';$('mdl').hidden=false;setTimeout(()=>$('mtx').focus(),50)}
+function mclose(){cdi=null;$('mdl').hidden=true;draw()}
+function mok(){const x=L[cdi];if(x.s!='Concluída'){x.s='Concluída';x.n=Date.now();x.dt=Date.now()}x.cd=$('mtx').value.trim();x.ex=true;cdi=null;$('mdl').hidden=true;sv()}
+document.addEventListener('keydown',e=>{if(e.key=='Escape'&&!$('mdl').hidden)mclose()});
+function ch(n,s){if(s=='Concluída'){cd(n);return}L[n].s=s;L[n].n=Date.now();sv()}function rm(n){L.splice(n,1);sv()}
 function NN(t,o){if('Notification' in window&&Notification.permission=='granted')return new Notification(t,o);setTimeout(()=>alert(t+'\n'+o.body),50);return {}}
 function testN(){const p='Notification' in window?Notification.permission:'indisponível';NN('Teste de aviso','Se você viu isto, as notificações funcionam.');$('ns').textContent='Versão v5 · permissão do navegador: '+p+' · cobrança por data ativa'}
 function tick(){const now=Date.now();let ch=0;
