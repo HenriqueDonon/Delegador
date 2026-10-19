@@ -17,9 +17,13 @@ button.g{background:var(--g)}button.o{background:#fff;color:var(--n);border:1px 
 .chk{display:flex;gap:8px;align-items:center;font-weight:400;margin:6px 0}.chk input{width:auto}
 pre{white-space:pre-wrap;background:#f0eeea;padding:12px;border-radius:8px;font:inherit;font-size:14px}
 .item{border-top:1px solid #eee;padding:8px 0;font-size:14px}.done{text-decoration:line-through;opacity:.5}
+.tabs{display:flex;gap:8px;margin-bottom:14px}.tabs button{flex:1}
+.det{font-size:14px;background:#f8f7f4;border-radius:8px;padding:10px;margin-top:6px}.det b{display:block;margin-top:6px;font-size:12px;color:var(--g);text-transform:uppercase}.hd{cursor:pointer}
 </style></head><body><main>
 <h1>Delegue como um militar</h1><div class="sub">Preencha os 4 passos → copie a mensagem → acompanhe.</div>
 
+<div class="tabs"><button id="b1" onclick="tab(1)">✍ Registrar</button><button id="b2" class="o" onclick="tab(2)">📋 Acompanhamentos</button></div>
+<div id="tab1">
 <div class="card"><h2><span class="step">1</span>Organize as prioridades</h2>
 <label>Tarefa</label><input id="t" placeholder="Ex.: Atualizar firmware dos firewalls do cliente X">
 <div class="row"><div><label>Urgência</label><select id="u"><option value="1">Muito urgente</option><option value="0">Pouco urgente</option></select></div>
@@ -47,11 +51,15 @@ pre{white-space:pre-wrap;background:#f0eeea;padding:12px;border-radius:8px;font:
 
 <div class="card" id="out" hidden><h2>Mensagem</h2><pre id="msg"></pre><button onclick="navigator.clipboard.writeText(msg.textContent)">Copiar</button></div>
 
-<div class="card"><h2>Acompanhamento</h2>
+</div>
+<div id="tab2" hidden>
+<div class="card"><h2>Acompanhamentos</h2>
+<select id="fl" onchange="draw()" style="margin-bottom:8px"><option value="">Todos os status</option><option>Pendente</option><option>Em andamento</option><option>Aguardando</option><option>Concluída</option></select>
 <div class="row" style="margin-bottom:8px"><button class="g" onclick="perm()">🔔 Ativar avisos</button>
 <select id="iv" onchange="setIv()"><option value="1">Lembrar a cada 1 min (teste)</option><option value="15">a cada 15 min</option><option value="30">a cada 30 min</option><option value="60">a cada 1 hora</option><option value="120">a cada 2 horas</option></select></div>
 <div id="ns" style="font-size:13px;color:#667;margin-bottom:8px"></div>
 <div id="list">Nada salvo.</div></div>
+</div>
 
 <script>
 const $=id=>document.getElementById(id);
@@ -83,13 +91,18 @@ Notification.requestPermission().then(()=>{ns();new Notification('Avisos ativado
 function ns(){const p='Notification' in window?Notification.permission:'none';
 $('ns').textContent=p=='granted'?'🔔 Avisos ativos — mantenha esta aba aberta. Pendente/Em andamento = avisa; Aguardando/Concluída = silencia.':'🔕 Notificação do sistema indisponível (comum em arquivo local). Os lembretes virão como pop-up de alerta nesta aba.'}
 function draw(){const now=new Date().toISOString().slice(0,10);
-$('list').innerHTML=L.length?L.map((x,n)=>{const late=x.d&&x.d<now&&ACT.includes(x.s);
-return `<div class="item ${x.s=='Concluída'?'done':''}"><b>${x.t}</b> → ${x.p}${late?' <span style="color:var(--r)">⚠ atrasada</span>':''}<br>Prazo: ${x.d||'-'} · ${x.f||''}${x.cb?'<br>🔔 Cobrar: '+new Date(x.cb).toLocaleString('pt-BR').slice(0,-3):''}<br>
-<select onchange="ch(${n},this.value)" style="width:auto">${ST.map(s=>`<option ${s==x.s?'selected':''}>${s}</option>`).join('')}</select> ${x.cb&&x.s!='Concluída'?`<button class="o" onclick="ad(${n})">Adiar cobrança +1 dia</button> `:''}<button class="o" onclick="rm(${n})">Excluir</button></div>`}).join(''):'Nada salvo.';
-const c=L.filter(x=>ACT.includes(x.s)).length;document.title=(c?`(${c}) `:'')+'Delegador'}
+const fl=$('fl').value;const V=L.map((x,n)=>[x,n]).filter(([x])=>!fl||x.s==fl);$('list').innerHTML=V.length?V.map(([x,n])=>{const late=x.d&&x.d<now&&ACT.includes(x.s);
+return `<div class="item ${x.s=='Concluída'?'done':''}"><div class="hd" onclick="tgl(${n})"><b>${x.ex?'▾':'▸'} ${x.t}</b> → ${x.p}${late?' <span style="color:var(--r)">⚠ atrasada</span>':''}<br>Prazo: ${x.d||'-'} · ${x.f||''}${x.cb?'<br>🔔 Cobrar: '+new Date(x.cb).toLocaleString('pt-BR').slice(0,-3):''}</div>${x.ex?det(x):''}<div style="margin-top:6px">
+<select onchange="ch(${n},this.value)" style="width:auto">${ST.map(s=>`<option ${s==x.s?'selected':''}>${s}</option>`).join('')}</select> ${x.cb&&x.s!='Concluída'?`<button class="o" onclick="ad(${n})">Adiar cobrança +1 dia</button> `:''}<button class="o" onclick="rm(${n})">Excluir</button></div></div>`}).join(''):'Nada salvo.';
+const c=L.filter(x=>ACT.includes(x.s)).length;$('b2').textContent='📋 Acompanhamentos ('+L.length+')';document.title=(c?`(${c}) `:'')+'Delegador'}
 function sv(){try{localStorage.dlg=JSON.stringify(L)}catch(e){}draw()}
-function save(){if(!$('t').value)return;L.unshift({t:$('t').value,p:$('p').value,d:$('d').value,f:$('f').value,s:$('p').value&&$('cb').value?'Aguardando':'Pendente',cb:$('cb').value,nc:0,n:Date.now()});sv()}
+function save(){if(!$('t').value)return;L.unshift({t:$('t').value,p:$('p').value,d:$('d').value,f:$('f').value,w:$('w').value,o:$('o').value,l:$('l').value,c:$('c').value,rep:$('rep').checked,s:$('p').value&&$('cb').value?'Aguardando':'Pendente',cb:$('cb').value,nc:0,n:Date.now()});clr();sv();tab(2)}
 function ad(n){const d=new Date(Math.max(Date.now(),new Date(L[n].cb||Date.now()).getTime())+864e5);L[n].cb=new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,16);L[n].nc=0;sv()}
+function tab(k){$('tab1').hidden=k!=1;$('tab2').hidden=k!=2;$('b1').className=k==1?'':'o';$('b2').className=k==2?'':'o'}
+function clr(){['t','p','w','o','l','d','f','cb','c'].forEach(i=>$(i).value='');$('h').checked=$('a').checked=$('rep').checked=false;$('out').hidden=true;r1();r2()}
+function tgl(n){L[n].ex=!L[n].ex;sv()}
+function det(x){const r=(a,b)=>`<b>${a}</b>${String(b||'-').replace(/</g,'&lt;')}`;
+return `<div class="det">${r('Status',x.s)}${r('Por que é importante',x.w)}${r('Objetivo final',x.o)}${r('Limites',x.l)}${r('Critérios de sucesso',x.c)}${r('Prazo',x.d)}${r('Acompanhamento',x.f)}${r('Cobrar em',x.cb?new Date(x.cb).toLocaleString('pt-BR').slice(0,-3):'')}${r('Entendimento confirmado',x.rep?'Sim':'Não')}</div>`}
 function ch(n,s){L[n].s=s;L[n].n=Date.now();sv()}function rm(n){L.splice(n,1);sv()}
 function NN(t,o){if('Notification' in window&&Notification.permission=='granted')return new Notification(t,o);setTimeout(()=>alert(t+'\n'+o.body),50);return {}}
 function tick(){const now=Date.now();let ch=0;
