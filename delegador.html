@@ -56,7 +56,7 @@ pre{white-space:pre-wrap;background:#f0eeea;padding:12px;border-radius:8px;font:
 <div id="tab2" hidden>
 <div class="card"><h2>Acompanhamentos</h2>
 <select id="fl" onchange="draw()" style="margin-bottom:8px"><option value="">Todos os status</option><option>Pendente</option><option>Em andamento</option><option>Aguardando</option><option>Concluída</option></select>
-<div class="row" style="margin-bottom:8px"><button class="g" onclick="perm()">🔔 Ativar avisos</button>
+<div class="row" style="margin-bottom:8px"><button class="g" onclick="perm()">🔔 Ativar avisos</button><button class="o" onclick="testN()" style="flex:0 0 auto">Testar</button>
 <select id="iv" onchange="setIv()"><option value="1">Lembrar a cada 1 min (teste)</option><option value="15">a cada 15 min</option><option value="30">a cada 30 min</option><option value="60">a cada 1 hora</option><option value="120">a cada 2 horas</option></select></div>
 <div id="ns" style="font-size:13px;color:#667;margin-bottom:8px"></div>
 <div id="list">Nada salvo.</div></div>
@@ -114,6 +114,7 @@ function det(x){const r=(a,b)=>`<b>${a}</b>${String(b||'-').replace(/</g,'&lt;')
 return `<div class="det">${r('Status',x.s)}${r('Por que é importante',x.w)}${r('Objetivo final',x.o)}${r('Limites',x.l)}${r('Critérios de sucesso',x.c)}${r('Prazo',x.d)}${r('Acompanhamento',x.f)}${r('Cobrar em',x.cb?new Date(x.cb).toLocaleString('pt-BR').slice(0,-3):'')}${r('Entendimento confirmado',x.rep?'Sim':'Não')}</div>`}
 function ch(n,s){L[n].s=s;L[n].n=Date.now();sv()}function rm(n){L.splice(n,1);sv()}
 function NN(t,o){if('Notification' in window&&Notification.permission=='granted')return new Notification(t,o);setTimeout(()=>alert(t+'\n'+o.body),50);return {}}
+function testN(){const p='Notification' in window?Notification.permission:'indisponível';NN('Teste de aviso','Se você viu isto, as notificações funcionam.');$('ns').textContent='Versão v5 · permissão do navegador: '+p+' · cobrança por data ativa'}
 function tick(){const now=Date.now();let ch=0;
 L.forEach(x=>{if(x.s!='Concluída'&&x.cb&&new Date(x.cb).getTime()<=now&&now-(x.nc||0)>=iv*60000){x.nc=now;ch=1;
 const nt=NN('Cobrar '+(x.p||'responsável')+': '+x.t,{body:'Hora de cobrar. Concluída encerra; "Adiar cobrança" define novo lembrete.',tag:'c'+x.t,requireInteraction:true});
