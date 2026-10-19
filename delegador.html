@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Delegador</title>
+<style>
+:root{--g:#b8925a;--n:#0f2236;--bg:#f4f2ef;--r:#8a2f22}
+*{box-sizing:border-box}body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--n);margin:0;padding:16px}
+main{max-width:640px;margin:auto}h1{font-size:22px;margin:0 0 4px}.sub{color:#667;margin-bottom:16px;font-size:14px}
+.card{background:#fff;border-radius:12px;padding:16px;margin-bottom:14px;box-shadow:0 2px 8px #0001}
+.step{display:inline-block;background:var(--g);color:#fff;border-radius:4px;padding:2px 8px;margin-right:6px}
+h2{font-size:17px;margin:0 0 10px}label{display:block;font-size:14px;margin:10px 0 4px;font-weight:600}
+input,textarea,select{width:100%;padding:9px;border:1px solid #ccc;border-radius:8px;font:inherit}textarea{min-height:60px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+button{background:var(--n);color:#fff;border:0;border-radius:8px;padding:10px 14px;font:inherit;cursor:pointer}
+button.g{background:var(--g)}button.o{background:#fff;color:var(--n);border:1px solid var(--n)}
+.res{padding:10px;border-radius:8px;margin-top:10px;font-weight:600}
+.ok{background:#e6f3e6}.no{background:#fbe5e1}.mid{background:#fff3d6}
+.chk{display:flex;gap:8px;align-items:center;font-weight:400;margin:6px 0}.chk input{width:auto}
+pre{white-space:pre-wrap;background:#f0eeea;padding:12px;border-radius:8px;font:inherit;font-size:14px}
+.item{border-top:1px solid #eee;padding:8px 0;font-size:14px}.done{text-decoration:line-through;opacity:.5}
+</style></head><body><main>
+<h1>Delegue como um militar</h1><div class="sub">Preencha os 4 passos → copie a mensagem → acompanhe.</div>
+
+<div class="card"><h2><span class="step">1</span>Organize as prioridades</h2>
+<label>Tarefa</label><input id="t" placeholder="Ex.: Atualizar firmware dos firewalls do cliente X">
+<div class="row"><div><label>Urgência</label><select id="u"><option value="1">Muito urgente</option><option value="0">Pouco urgente</option></select></div>
+<div><label>Importância</label><select id="i"><option value="1">Muito importante</option><option value="0">Pouco importante</option></select></div></div>
+<div id="r1"></div></div>
+
+<div class="card"><h2><span class="step">2</span>Decida para quem delegar</h2>
+<label>Pessoa</label><input id="p" placeholder="Nome">
+<label class="chk"><input type="checkbox" id="h"> Tem as habilidades necessárias?</label>
+<label class="chk"><input type="checkbox" id="a"> Tem algo a aprender com essa tarefa?</label>
+<div id="r2"></div></div>
+
+<div class="card"><h2><span class="step">3</span>Explique a tarefa</h2>
+<label>Por que é importante?</label><textarea id="w"></textarea>
+<label>Objetivo final</label><textarea id="o"></textarea>
+<label>Limites (o que NÃO pode acontecer)</label><textarea id="l"></textarea>
+<label class="chk"><input type="checkbox" id="rep"> Pedi para repetir o que entendeu</label></div>
+
+<div class="card"><h2><span class="step">4</span>Resultados esperados</h2>
+<label>Prazo</label><input id="d" type="date">
+<label>Como/quando acompanhar</label><input id="f" placeholder="Ex.: check-in toda quarta, 10h">
+<label>Cobrar em (data e hora do lembrete)</label><input id="cb" type="datetime-local">
+<label>Critérios de sucesso</label><textarea id="c"></textarea>
+<div style="margin-top:12px" class="row"><button class="g" onclick="gen()">Gerar mensagem</button><button class="o" onclick="save()">Salvar acompanhamento</button></div></div>
+
+<div class="card" id="out" hidden><h2>Mensagem</h2><pre id="msg"></pre><button onclick="navigator.clipboard.writeText(msg.textContent)">Copiar</button></div>
+
+<div class="card"><h2>Acompanhamento</h2>
+<div class="row" style="margin-bottom:8px"><button class="g" onclick="perm()">🔔 Ativar avisos</button>
+<select id="iv" onchange="setIv()"><option value="1">Lembrar a cada 1 min (teste)</option><option value="15">a cada 15 min</option><option value="30">a cada 30 min</option><option value="60">a cada 1 hora</option><option value="120">a cada 2 horas</option></select></div>
+<div id="ns" style="font-size:13px;color:#667;margin-bottom:8px"></div>
+<div id="list">Nada salvo.</div></div>
+
+<script>
+const $=id=>document.getElementById(id);
+function r1(){const U=+$('u').value,I=+$('i').value;
+const m=[["Backlog: faça quando sobrar tempo, delegue ou descarte","mid"],["Agende para depois","mid"],["Delegue para alguém","ok"],["Faça agora","ok"]];
+const k=I?(U?3:1):(U?2:0);$('r1').innerHTML=`<div class="res ${m[k][1]}">${m[k][0]}</div>`}
+function r2(){const h=$('h').checked,a=$('a').checked;let t,c;
+if(!h){t="Escolha outra pessoa (falta habilidade)";c="no"}else if(!a){t="Habilidade ok, mas sem aprendizado: considere outra pessoa";c="mid"}else{t="Delegue para "+($('p').value||"ela");c="ok"}
+$('r2').innerHTML=`<div class="res ${c}">${t}</div>`}
+['u','i'].forEach(x=>$(x).onchange=r1);['h','a'].forEach(x=>$(x).onchange=r2);r1();r2();
+function gen(){const d=$('d').value?new Date($('d').value+'T12:00').toLocaleDateString('pt-BR'):'a definir';
+$('msg').textContent=`Oi ${$('p').value}, preciso da sua ajuda com: ${$('t').value}.
+
+1) Por que importa: ${$('w').value}
+2) Objetivo final: ${$('o').value}
+3) Limites (não pode acontecer): ${$('l').value}
+4) Pode me repetir com suas palavras o que entendeu?
+
+Prazo: ${d}
+Acompanhamento: ${$('f').value}
+Critérios de sucesso: ${$('c').value}`;$('out').hidden=false}
+const ST=['Pendente','Em andamento','Aguardando','Concluída'],ACT=['Pendente','Em andamento'];
+let L=[];try{L=JSON.parse(localStorage.dlg||'[]')}catch(e){}
+L.forEach(x=>{if(!x.s)x.s=x.ok?'Concluída':'Pendente'});
+let iv=+(localStorage.dlgiv||30);$('iv').value=iv;
+function setIv(){iv=+$('iv').value;try{localStorage.dlgiv=iv}catch(e){}}
+function perm(){if(!('Notification' in window))return alert('Navegador sem suporte a notificações');
+Notification.requestPermission().then(()=>{ns();new Notification('Avisos ativados',{body:'Vou lembrar das tarefas pendentes.'})})}
+function ns(){const p='Notification' in window?Notification.permission:'none';
+$('ns').textContent=p=='granted'?'🔔 Avisos ativos — mantenha esta aba aberta. Pendente/Em andamento = avisa; Aguardando/Concluída = silencia.':'🔕 Notificação do sistema indisponível (comum em arquivo local). Os lembretes virão como pop-up de alerta nesta aba.'}
+function draw(){const now=new Date().toISOString().slice(0,10);
+$('list').innerHTML=L.length?L.map((x,n)=>{const late=x.d&&x.d<now&&ACT.includes(x.s);
+return `<div class="item ${x.s=='Concluída'?'done':''}"><b>${x.t}</b> → ${x.p}${late?' <span style="color:var(--r)">⚠ atrasada</span>':''}<br>Prazo: ${x.d||'-'} · ${x.f||''}${x.cb?'<br>🔔 Cobrar: '+new Date(x.cb).toLocaleString('pt-BR').slice(0,-3):''}<br>
+<select onchange="ch(${n},this.value)" style="width:auto">${ST.map(s=>`<option ${s==x.s?'selected':''}>${s}</option>`).join('')}</select> ${x.cb&&x.s!='Concluída'?`<button class="o" onclick="ad(${n})">Adiar cobrança +1 dia</button> `:''}<button class="o" onclick="rm(${n})">Excluir</button></div>`}).join(''):'Nada salvo.';
+const c=L.filter(x=>ACT.includes(x.s)).length;document.title=(c?`(${c}) `:'')+'Delegador'}
+function sv(){try{localStorage.dlg=JSON.stringify(L)}catch(e){}draw()}
+function save(){if(!$('t').value)return;L.unshift({t:$('t').value,p:$('p').value,d:$('d').value,f:$('f').value,s:$('p').value&&$('cb').value?'Aguardando':'Pendente',cb:$('cb').value,nc:0,n:Date.now()});sv()}
+function ad(n){const d=new Date(Math.max(Date.now(),new Date(L[n].cb||Date.now()).getTime())+864e5);L[n].cb=new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,16);L[n].nc=0;sv()}
+function ch(n,s){L[n].s=s;L[n].n=Date.now();sv()}function rm(n){L.splice(n,1);sv()}
+function NN(t,o){if('Notification' in window&&Notification.permission=='granted')return new Notification(t,o);setTimeout(()=>alert(t+'\n'+o.body),50);return {}}
+function tick(){const now=Date.now();let ch=0;
+L.forEach(x=>{if(x.s=='Aguardando'&&x.cb&&new Date(x.cb).getTime()<=now&&now-(x.nc||0)>=iv*60000){x.nc=now;ch=1;
+const nt=NN('Cobrar '+(x.p||'responsável')+': '+x.t,{body:'Hora de cobrar. Concluída encerra; "Adiar cobrança" define novo lembrete.',tag:'c'+x.t,requireInteraction:true});
+nt.onclick=()=>{window.focus();nt.close()}}});
+L.forEach(x=>{if(ACT.includes(x.s)&&now-(x.n||0)>=iv*60000){x.n=now;ch=1;
+const nt=NN('Tarefa '+x.s.toLowerCase()+': '+x.t,{body:`Com ${x.p||'você'}${x.d?' · prazo '+x.d:''}. Marque Aguardando ou Concluída para parar os avisos.`,tag:'t'+x.t,requireInteraction:true});
+nt.onclick=()=>{window.focus();nt.close()}}});if(ch)sv()}
+setInterval(tick,30000);ns();draw();
+</script></main></body></html>
