@@ -1,26 +1,80 @@
 <!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<script>(function(){var t;try{t=localStorage.dlgth}catch(e){}if(!t)t=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';document.documentElement.dataset.theme=t})()</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700&display=swap" rel="stylesheet">
 <title>Delegador</title>
 <style>
-:root{--g:#b8925a;--n:#0f2236;--bg:#f4f2ef;--r:#8a2f22}
-*{box-sizing:border-box}body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--n);margin:0;padding:16px}
-main{max-width:640px;margin:auto}h1{font-size:22px;margin:0 0 4px}.sub{color:#667;margin-bottom:16px;font-size:14px}
-.card{background:#fff;border-radius:12px;padding:16px;margin-bottom:14px;box-shadow:0 2px 8px #0001}
-.step{display:inline-block;background:var(--g);color:#fff;border-radius:4px;padding:2px 8px;margin-right:6px}
-h2{font-size:17px;margin:0 0 10px}label{display:block;font-size:14px;margin:10px 0 4px;font-weight:600}
-input,textarea,select{width:100%;padding:9px;border:1px solid #ccc;border-radius:8px;font:inherit}textarea{min-height:60px}
+:root{color-scheme:light;--bg:#eef3fb;--card:#fff;--n:#0b1b33;--mut:#5b6b85;--g:#1f6feb;--g2:#00b4ff;--line:#d9e3f2;--in:#f7faff;--r:#d6336c;--sh:0 6px 24px #1f6feb18;--ok:#e3f6ec;--okc:#0a6b3d;--no:#fde8ee;--noc:#a3153f;--mid:#fff4d6;--midc:#8a5a00;--det:#f1f6ff}
+[data-theme=dark]{color-scheme:dark;--bg:#060d1a;--card:#0e1a2e;--n:#e6efff;--mut:#8ea3c4;--g:#4da3ff;--g2:#22d3ee;--line:#1d2f4d;--in:#0a1424;--r:#ff6b9a;--sh:0 6px 28px #0009;--ok:#0d2e22;--okc:#5ee0a0;--no:#35121f;--noc:#ff8fb0;--mid:#33290c;--midc:#ffd166;--det:#0a1424}
+*{box-sizing:border-box}
+body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:radial-gradient(900px 420px at 8% -10%,#1f6feb26,transparent),radial-gradient(700px 360px at 100% 0,#00b4ff1c,transparent),var(--bg);color:var(--n);margin:0;padding:18px;min-height:100vh;transition:background .3s,color .3s}
+main{max-width:660px;margin:auto}
+header{display:flex;justify-content:space-between;align-items:center;gap:8px}header button{padding:6px 11px;font-size:18px}
+h1{font-size:24px;margin:0 0 4px;background:linear-gradient(90deg,var(--g),var(--g2));-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:-.3px}
+.sub{color:var(--mut);margin-bottom:18px;font-size:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:16px;box-shadow:var(--sh)}
+.step{display:inline-block;background:linear-gradient(135deg,var(--g),var(--g2));color:#fff;border-radius:8px;padding:2px 9px;margin-right:8px;font-weight:700}
+h2{font-size:17px;margin:0 0 10px}
+label{display:block;font-size:13px;margin:12px 0 5px;font-weight:600;color:var(--mut)}
+input,textarea,select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font:inherit;background:var(--in);color:var(--n);transition:border-color .2s,box-shadow .2s}
+input:focus,textarea:focus,select:focus{outline:0;border-color:var(--g);box-shadow:0 0 0 3px color-mix(in srgb,var(--g) 25%,transparent)}
+textarea{min-height:62px;resize:vertical}
 .row{display:flex;gap:8px}.row>*{flex:1}
-button{background:var(--n);color:#fff;border:0;border-radius:8px;padding:10px 14px;font:inherit;cursor:pointer}
-button.g{background:var(--g)}button.o{background:#fff;color:var(--n);border:1px solid var(--n)}
-.res{padding:10px;border-radius:8px;margin-top:10px;font-weight:600}
-.ok{background:#e6f3e6}.no{background:#fbe5e1}.mid{background:#fff3d6}
-.chk{display:flex;gap:8px;align-items:center;font-weight:400;margin:6px 0}.chk input{width:auto}
-pre{white-space:pre-wrap;background:#f0eeea;padding:12px;border-radius:8px;font:inherit;font-size:14px}
-.item{border-top:1px solid #eee;padding:8px 0;font-size:14px}.done{text-decoration:line-through;opacity:.5}
-.tabs{display:flex;gap:8px;margin-bottom:14px}.tabs button{flex:1}
-.det{font-size:14px;background:#f8f7f4;border-radius:8px;padding:10px;margin-top:6px}.det b{display:block;margin-top:6px;font-size:12px;color:var(--g);text-transform:uppercase}.hd{cursor:pointer}
+button{background:linear-gradient(135deg,var(--g),var(--g2));color:#fff;border:0;border-radius:10px;padding:10px 15px;font:inherit;font-weight:600;cursor:pointer;transition:transform .15s,box-shadow .2s,opacity .2s;box-shadow:0 4px 14px color-mix(in srgb,var(--g) 35%,transparent)}
+button:hover{transform:translateY(-1px)}button:active{transform:none}
+button.g{background:linear-gradient(135deg,var(--g),var(--g2))}
+button.o{background:transparent;color:var(--g);border:1px solid var(--g);box-shadow:none}
+button.o:hover{background:color-mix(in srgb,var(--g) 12%,transparent)}
+.tabs{display:flex;gap:8px;margin-bottom:16px}.tabs button{flex:1}
+.res{padding:11px 13px;border-radius:10px;margin-top:10px;font-weight:600;border:1px solid transparent}
+.ok{background:var(--ok);color:var(--okc)}.no{background:var(--no);color:var(--noc)}.mid{background:var(--mid);color:var(--midc)}
+.chk{display:flex;gap:9px;align-items:center;font-weight:400;margin:8px 0;color:var(--n)}.chk input{width:auto;accent-color:var(--g)}
+pre{white-space:pre-wrap;background:var(--in);border:1px solid var(--line);padding:13px;border-radius:10px;font:inherit;font-size:14px}
+.item{border-top:1px solid var(--line);padding:11px 0;font-size:14px}.done{text-decoration:line-through;opacity:.5}
+.det{font-size:14px;background:var(--det);border:1px solid var(--line);border-radius:10px;padding:11px;margin-top:8px}
+.det b{display:block;margin-top:8px;font-size:11px;letter-spacing:.6px;color:var(--g);text-transform:uppercase}
+.hd{cursor:pointer}
+
+body{font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+h1,h2,.stat b{font-family:Sora,Inter,system-ui,sans-serif}
+body::before{content:"";position:fixed;inset:0;z-index:-1;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:44px 44px;opacity:.35;-webkit-mask-image:radial-gradient(ellipse at 50% 0,#000,transparent 70%);mask-image:radial-gradient(ellipse at 50% 0,#000,transparent 70%)}
+@keyframes up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.eyebrow{display:inline-block;font-size:11px;letter-spacing:1.4px;text-transform:uppercase;font-weight:700;color:var(--g);background:color-mix(in srgb,var(--g) 12%,transparent);padding:4px 10px;border-radius:99px;margin-bottom:10px}
+h1{font-size:28px;line-height:1.15}
+.card{animation:up .4s both;transition:transform .2s,box-shadow .2s}
+.card:hover{transform:translateY(-2px);box-shadow:0 12px 34px color-mix(in srgb,var(--g) 18%,transparent)}
+.step{width:28px;height:28px;display:inline-grid;place-items:center;padding:0;border-radius:10px;font-size:14px}
+.tabs{background:color-mix(in srgb,var(--card) 80%,transparent);border:1px solid var(--line);padding:5px;border-radius:14px;position:sticky;top:8px;z-index:5;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.tabs button{box-shadow:none;border:0;border-radius:10px}
+.tabs button.o{background:transparent;color:var(--mut)}.tabs button.o:hover{color:var(--g)}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:4px 0 12px}
+.stat{background:var(--in);border:1px solid var(--line);border-radius:12px;padding:10px 4px;text-align:center}
+.stat b{display:block;font-size:22px}.stat span{font-size:10.5px;color:var(--mut)}
+.k-pend b{color:#f59e0b}.k-and b{color:var(--g)}.k-agu b{color:#a78bfa}.k-ok b{color:#22c55e}.k-late b{color:var(--r)}
+.prog{height:8px;background:var(--in);border:1px solid var(--line);border-radius:99px;overflow:hidden}
+.prog i{display:block;height:100%;background:linear-gradient(90deg,var(--g),var(--g2));border-radius:99px;transition:width .6s}
+.pt{font-size:12px;color:var(--mut);margin:5px 0 14px;text-align:right}
+.item{position:relative;border:1px solid var(--line);border-left:4px solid var(--g);border-radius:14px;padding:13px;margin-top:10px;background:var(--in);animation:up .35s both;transition:transform .15s}
+.item:hover{transform:translateX(2px)}
+.s-pend{border-left-color:#f59e0b}.s-and{border-left-color:var(--g)}.s-agu{border-left-color:#a78bfa}.s-ok{border-left-color:#22c55e}
+.done{text-decoration:none;opacity:.65}.done .tt b{text-decoration:line-through}
+.hd{display:flex;gap:11px;align-items:center}
+.av{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,var(--g),var(--g2));color:#fff;display:grid;place-items:center;font-weight:700;font-size:13px;flex:none}
+.tt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.tt b{font-size:15px}
+.mt{font-size:12.5px;color:var(--mut)}.late{color:var(--r);font-weight:700}.ch{color:var(--mut)}
+.bd{font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;white-space:nowrap}
+.b-pend{background:color-mix(in srgb,#f59e0b 18%,transparent);color:#c77700}
+.b-and{background:color-mix(in srgb,var(--g) 16%,transparent);color:var(--g)}
+.b-agu{background:color-mix(in srgb,#a78bfa 20%,transparent);color:#7c5cdb}
+.b-ok{background:color-mix(in srgb,#22c55e 18%,transparent);color:#15803d}
+[data-theme=dark] .b-pend{color:#fbbf24}[data-theme=dark] .b-agu{color:#c4b5fd}[data-theme=dark] .b-ok{color:#4ade80}
+.item>div:last-child{display:flex;flex-wrap:wrap;gap:6px;margin-top:11px}
+.item select{width:auto;padding:7px 10px}.item button{padding:7px 12px;font-size:13px}
+.empty{text-align:center;padding:30px 10px;color:var(--mut);font-size:15px;line-height:1.6}
+.empty small{display:block;font-size:13px}
+@media(max-width:520px){.stats{grid-template-columns:repeat(3,1fr)}h1{font-size:24px}}
 </style></head><body><main>
-<h1>Delegue como um militar</h1><div class="sub">Preencha os 4 passos → copie a mensagem → acompanhe.</div>
+<div class="eyebrow">Delegador · gestão de time</div><header><h1>Delegue como um militar</h1><button id="tg" class="o" onclick="theme()" title="Alternar tema">🌙</button></header><div class="sub">Preencha os 4 passos → copie a mensagem → acompanhe.</div>
 
 <div class="tabs"><button id="b1" onclick="tab(1)">✍ Registrar</button><button id="b2" class="o" onclick="tab(2)">📋 Acompanhamentos</button></div>
 <div id="tab1">
@@ -55,10 +109,11 @@ pre{white-space:pre-wrap;background:#f0eeea;padding:12px;border-radius:8px;font:
 </div>
 <div id="tab2" hidden>
 <div class="card"><h2>Acompanhamentos</h2>
+<div id="st"></div>
 <select id="fl" onchange="draw()" style="margin-bottom:8px"><option value="">Todos os status</option><option>Pendente</option><option>Em andamento</option><option>Aguardando</option><option>Concluída</option></select>
 <div class="row" style="margin-bottom:8px"><button class="g" onclick="perm()">🔔 Ativar avisos</button><button class="o" onclick="testN()" style="flex:0 0 auto">Testar</button>
 <select id="iv" onchange="setIv()"><option value="1">Lembrar a cada 1 min (teste)</option><option value="15">a cada 15 min</option><option value="30">a cada 30 min</option><option value="60">a cada 1 hora</option><option value="120">a cada 2 horas</option></select></div>
-<div id="ns" style="font-size:13px;color:#667;margin-bottom:8px"></div>
+<div id="ns" style="font-size:13px;color:var(--mut);margin-bottom:8px"></div>
 <div id="list">Nada salvo.</div></div>
 </div>
 
@@ -91,10 +146,14 @@ function perm(){if(!('Notification' in window))return alert('Navegador sem supor
 Notification.requestPermission().then(()=>{ns();new Notification('Avisos ativados',{body:'Vou lembrar das tarefas pendentes.'})})}
 function ns(){const p='Notification' in window?Notification.permission:'none';
 $('ns').textContent=p=='granted'?'🔔 Avisos ativos — mantenha esta aba aberta. Pendente/Em andamento = avisa; Aguardando/Concluída = silencia.':'🔕 Notificação do sistema indisponível (comum em arquivo local). Os lembretes virão como pop-up de alerta nesta aba.'}
+function esc(v){return String(v||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
 function draw(){const now=new Date().toISOString().slice(0,10);
+const cnt=q=>L.filter(x=>x.s==q).length,lt=L.filter(x=>x.d&&x.d<now&&ACT.includes(x.s)).length,pc=L.length?Math.round(cnt('Concluída')/L.length*100):0;
+$('st').innerHTML='<div class="stats">'+[['Pendentes',cnt('Pendente'),'pend'],['Em andamento',cnt('Em andamento'),'and'],['Aguardando',cnt('Aguardando'),'agu'],['Concluídas',cnt('Concluída'),'ok'],['Atrasadas',lt,'late']].map(([a,b,c])=>`<div class="stat k-${c}"><b>${b}</b><span>${a}</span></div>`).join('')+`</div><div class="prog"><i style="width:${pc}%"></i></div><div class="pt">${pc}% concluído</div>`;
 const fl=$('fl').value;const V=L.map((x,n)=>[x,n]).filter(([x])=>!fl||x.s==fl);$('list').innerHTML=V.length?V.map(([x,n])=>{const late=x.d&&x.d<now&&ACT.includes(x.s);
-return `<div class="item ${x.s=='Concluída'?'done':''}"><div class="hd" onclick="tgl(${n})"><b>${x.ex?'▾':'▸'} ${x.t}</b> → ${x.p}${late?' <span style="color:var(--r)">⚠ atrasada</span>':''}<br>Prazo: ${x.d||'-'} · ${x.f||''}${x.cb?'<br>🔔 Cobrar: '+new Date(x.cb).toLocaleString('pt-BR').slice(0,-3):''}</div>${x.ex?det(x):''}<div style="margin-top:6px">
-<select onchange="ch(${n},this.value)" style="width:auto">${ST.map(s=>`<option ${s==x.s?'selected':''}>${s}</option>`).join('')}</select> ${x.cb&&x.s!='Concluída'?`<button class="o" onclick="ad(${n})">Adiar cobrança +1 dia</button> `:''}<button class="o" onclick="edit(${n})">✏️ Editar</button> <button class="o" onclick="rm(${n})">Excluir</button></div></div>`}).join(''):'Nada salvo.';
+const ini=(x.p||'?').trim().slice(0,2).toUpperCase(),cls=['pend','and','agu','ok'][ST.indexOf(x.s)];
+return `<div class="item s-${cls} ${x.s=='Concluída'?'done':''}"><div class="hd" onclick="tgl(${n})"><div class="av">${esc(ini)}</div><div class="tt"><b>${esc(x.t)}</b><span class="mt">${esc(x.p||'Sem responsável')}${late?' · <span class="late">⚠ atrasada</span>':''}</span><span class="mt">📅 ${x.d?x.d.split('-').reverse().join('/'):'sem prazo'}${x.f?' · '+esc(x.f):''}${x.cb?' · 🔔 '+new Date(x.cb).toLocaleString('pt-BR').slice(0,-3):''}</span></div><span class="bd b-${cls}">${x.s}</span><span class="ch">${x.ex?'▾':'▸'}</span></div>${x.ex?det(x):''}<div style="margin-top:6px">
+<select onchange="ch(${n},this.value)" style="width:auto">${ST.map(s=>`<option ${s==x.s?'selected':''}>${s}</option>`).join('')}</select> ${x.cb&&x.s!='Concluída'?`<button class="o" onclick="ad(${n})">Adiar cobrança +1 dia</button> `:''}<button class="o" onclick="edit(${n})">✏️ Editar</button> <button class="o" onclick="rm(${n})">Excluir</button></div></div>`}).join(''):'<div class="empty">✨<br>Nenhuma tarefa por aqui.<small>Registre uma delegação na aba Registrar.</small></div>';
 const c=L.filter(x=>ACT.includes(x.s)).length;$('b2').textContent='📋 Acompanhamentos ('+L.length+')';document.title=(c?`(${c}) `:'')+'Delegador'}
 function sv(){try{localStorage.dlg=JSON.stringify(L)}catch(e){}draw()}
 function save(){if(!$('t').value)return;
@@ -122,5 +181,7 @@ nt.onclick=()=>{window.focus();nt.close()}}});
 L.forEach(x=>{if(ACT.includes(x.s)&&!x.cb&&now-(x.n||0)>=iv*60000){x.n=now;ch=1;
 const nt=NN('Tarefa '+x.s.toLowerCase()+': '+x.t,{body:`Com ${x.p||'você'}${x.d?' · prazo '+x.d:''}. Marque Aguardando ou Concluída para parar os avisos.`,tag:'t'+x.t,requireInteraction:true});
 nt.onclick=()=>{window.focus();nt.close()}}});if(ch)sv()}
+function theme(){const d=document.documentElement,n=d.dataset.theme=='dark'?'light':'dark';d.dataset.theme=n;try{localStorage.dlgth=n}catch(e){}$('tg').textContent=n=='dark'?'☀️':'🌙'}
+$('tg').textContent=document.documentElement.dataset.theme=='dark'?'☀️':'🌙';
 setInterval(tick,30000);setTimeout(tick,2000);ns();draw();
 </script></main></body></html>
